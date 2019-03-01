@@ -27,12 +27,12 @@ class SegmentationModule(SegmentationModuleBase):
         self.deep_sup_scale = deep_sup_scale
         self.is_unet = False
 
-    def __init__(self, unet, crit, deep_sup_scale=None):
-        super(SegmentationModule, self).__init__()
-        self.unet = unet
-        self.crit = crit
-        self.deep_sup_scale = deep_sup_scale
-        self.is_unet = True
+    # def __init__(self, unet, crit, deep_sup_scale=None):
+    #     super(SegmentationModule, self).__init__()
+    #     self.unet = unet
+    #     self.crit = crit
+    #     self.deep_sup_scale = deep_sup_scale
+    #     self.is_unet = True
 
     def forward(self, feed_dict, *, segSize=None):
         # training
