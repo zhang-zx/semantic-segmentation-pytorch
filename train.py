@@ -213,9 +213,9 @@ if __name__ == '__main__':
     # Model related arguments
     parser.add_argument('--id', default='baseline',
                         help="a name for identifying the model")
-    parser.add_argument('--arch_encoder', default='resnet50dilated',
+    parser.add_argument('--arch_encoder', default='resnet18dilated',
                         help="architecture of net_encoder")
-    parser.add_argument('--arch_decoder', default='ppm_deepsup',
+    parser.add_argument('--arch_decoder', default='c1_deepsup',
                         help="architecture of net_decoder")
     parser.add_argument('--weights_encoder', default='',
                         help="weights to finetune net_encoder")
