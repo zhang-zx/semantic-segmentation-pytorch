@@ -147,11 +147,11 @@ class TrainDataset(torchdata.Dataset):
             # image to float
             img = img.astype(np.float32)[:, :, ::-1]  # RGB to BGR!!!
             img = img.transpose((2, 0, 1))
-            if self.joint_transform is not None:
-                img, segm = self.joint_transform(Image.fromarray(img.copy()), Image.fromarray(segm.copy().astype(np.uint8)))
-            if self.sliding_crop is not None:
-                img_slices, segm_slices, slices_info = self.sliding_crop(img, segm)
-                img, mask = torch.stack(img_slices, 0), torch.stack(segm_slices, 0)
+            # if self.joint_transform is not None:
+            #     img, segm = self.joint_transform(Image.fromarray(img.copy()), Image.fromarray(segm.copy().astype(np.uint8)))
+            # if self.sliding_crop is not None:
+            #     img_slices, segm_slices, slices_info = self.sliding_crop(img, segm)
+            #     img, segm = torch.stack(img_slices, 0), torch.stack(segm_slices, 0)
 
             img = self.img_transform(torch.from_numpy(img.copy()))
 
