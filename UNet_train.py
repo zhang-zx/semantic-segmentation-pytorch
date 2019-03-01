@@ -54,11 +54,11 @@ def train(segmentation_module, iterator, optimizers, history, epoch, args):
         # calculate accuracy, and display
         if i % args.disp_iter == 0:
             print('Epoch: [{}][{}/{}], Time: {:.2f}, Data: {:.2f}, '
-                  'lr_encoder: {:.6f}, lr_decoder: {:.6f}, '
+                  'lr_unet: {:.6f}, '
                   'Accuracy: {:4.2f}, Loss: {:.6f}'
                   .format(epoch, i, args.epoch_iters,
                           batch_time.average(), data_time.average(),
-                          args.running_lr_encoder, args.running_lr_decoder,
+                          args.running_lr_unet,
                           ave_acc.average(), ave_total_loss.average()))
 
             fractional_epoch = epoch - 1 + 1. * i / args.epoch_iters
@@ -73,21 +73,15 @@ def train(segmentation_module, iterator, optimizers, history, epoch, args):
 
 def checkpoint(nets, history, args, epoch_num):
     print('Saving checkpoints...')
-    (net_encoder, net_decoder, crit) = nets
+    (net_unet, crit) = nets
     suffix_latest = 'epoch_{}.pth'.format(epoch_num)
 
-    dict_encoder = net_encoder.state_dict()
-    dict_decoder = net_decoder.state_dict()
-
-    # dict_encoder_save = {k: v for k, v in dict_encoder.items() if not (k.endswith('_tmp_running_mean') or k.endswith('tmp_running_var'))}
-    # dict_decoder_save = {k: v for k, v in dict_decoder.items() if not (k.endswith('_tmp_running_mean') or k.endswith('tmp_running_var'))}
+    dict_unet = net_unet.state_dict()
 
     torch.save(history,
                '{}/history_{}'.format(args.ckpt, suffix_latest))
-    torch.save(dict_encoder,
-               '{}/encoder_{}'.format(args.ckpt, suffix_latest))
-    torch.save(dict_decoder,
-               '{}/decoder_{}'.format(args.ckpt, suffix_latest))
+    torch.save(dict_unet,
+               '{}/unet_{}'.format(args.ckpt, suffix_latest))
 
 
 def group_weight(module):
@@ -114,46 +108,29 @@ def group_weight(module):
 
 
 def create_optimizers(nets, args):
-    (net_encoder, net_decoder, crit) = nets
-    optimizer_encoder = torch.optim.SGD(
-        group_weight(net_encoder),
-        lr=args.lr_encoder,
+    (net_unet, crit) = nets
+    optimizer_unet = torch.optim.SGD(
+        group_weight(net_unet),
+        lr=args.lr_unet,
         momentum=args.beta1,
         weight_decay=args.weight_decay)
-    optimizer_decoder = torch.optim.SGD(
-        group_weight(net_decoder),
-        lr=args.lr_decoder,
-        momentum=args.beta1,
-        weight_decay=args.weight_decay)
-    return (optimizer_encoder, optimizer_decoder)
+    return optimizer_unet
 
 
 def adjust_learning_rate(optimizers, cur_iter, args):
     scale_running_lr = ((1. - float(cur_iter) / args.max_iters) ** args.lr_pow)
-    args.running_lr_encoder = args.lr_encoder * scale_running_lr
-    args.running_lr_decoder = args.lr_decoder * scale_running_lr
+    args.running_lr_unet = args.lr_unet * scale_running_lr
 
-    (optimizer_encoder, optimizer_decoder) = optimizers
-    for param_group in optimizer_encoder.param_groups:
-        param_group['lr'] = args.running_lr_encoder
-    for param_group in optimizer_decoder.param_groups:
-        param_group['lr'] = args.running_lr_decoder
+    optimizer_unet = optimizers
+    for param_group in optimizer_unet.param_groups:
+        param_group['lr'] = args.running_lr_unet
+
 
 
 def main(args):
     # Network Builders
     builder = ModelBuilder()
     unet = builder.build_unet(n_channels=3, n_classes=args.num_class)
-
-    # net_encoder = builder.build_encoder(
-    #     arch=args.arch_encoder,
-    #     fc_dim=args.fc_dim,
-    #     weights=args.weights_encoder)
-    # net_decoder = builder.build_decoder(
-    #     arch=args.arch_decoder,
-    #     fc_dim=args.fc_dim,
-    #     num_class=args.num_class,
-    #     weights=args.weights_decoder)
 
     crit = nn.NLLLoss(ignore_index=-1)
     segmentation_module = SegmentationModule(unet, crit)
@@ -229,8 +206,9 @@ if __name__ == '__main__':
     parser.add_argument('--epoch_iters', default=5000, type=int,
                         help='iterations of each epoch (irrelevant to batch size)')
     parser.add_argument('--optim', default='SGD', help='optimizer')
-    parser.add_argument('--lr_encoder', default=2e-2, type=float, help='LR')
-    parser.add_argument('--lr_decoder', default=2e-2, type=float, help='LR')
+
+    parser.add_argument('--lr_unet', default=2e-2, type=float, help='LR')
+
     parser.add_argument('--lr_pow', default=0.9, type=float,
                         help='power in poly to drop LR')
     parser.add_argument('--beta1', default=0.9, type=float,
@@ -279,22 +257,18 @@ if __name__ == '__main__':
     args.batch_size = num_gpus * args.batch_size_per_gpu
 
     args.max_iters = args.epoch_iters * args.num_epoch
-    args.running_lr_encoder = args.lr_encoder
-    args.running_lr_decoder = args.lr_decoder
 
-    args.arch_encoder = args.arch_encoder.lower()
-    args.arch_decoder = args.arch_decoder.lower()
+    args.running_lr_unet = args.lr_unet
+
 
     # Model ID
-    args.id += '-' + args.arch_encoder
-    args.id += '-' + args.arch_decoder
+    args.id += 'unet'
     args.id += '-ngpus' + str(num_gpus)
     args.id += '-batchSize' + str(args.batch_size)
     args.id += '-imgMaxSize' + str(args.imgMaxSize)
     args.id += '-paddingConst' + str(args.padding_constant)
     args.id += '-segmDownsampleRate' + str(args.segm_downsampling_rate)
-    args.id += '-LR_encoder' + str(args.lr_encoder)
-    args.id += '-LR_decoder' + str(args.lr_decoder)
+    args.id += '-LR_UNET' + str(args.lr_unet)
     args.id += '-epoch' + str(args.num_epoch)
     if args.fix_bn:
         args.id += '-fixBN'
