@@ -14,7 +14,7 @@ def round2nearest_multiple(x, p):
 
 
 class TrainDataset(torchdata.Dataset):
-    def __init__(self, odgt, opt, max_sample=-1, batch_per_gpu=1):
+    def __init__(self, odgt, opt, max_sample=-1, batch_per_gpu=1, joint_transform=None):
         self.root_dataset = opt.root_dataset
         self.imgSize = opt.imgSize
         self.imgMaxSize = opt.imgMaxSize
@@ -24,6 +24,7 @@ class TrainDataset(torchdata.Dataset):
         # down sampling rate of segm labe
         self.segm_downsampling_rate = opt.segm_downsampling_rate
         self.batch_per_gpu = batch_per_gpu
+        self.joint_transform = joint_transform
 
         # classify images into two classes: 1. h > w and 2. h <= w
         self.batch_record_list = [[], []]
