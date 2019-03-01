@@ -56,13 +56,13 @@ class SegmentationModule(SegmentationModuleBase):
                 return pred
         else:
             if segSize is None:
-                pred = self.unet(feed_dict['img_data'], return_feature_maps=True)
+                pred = self.unet(feed_dict['img_data'])
                 loss = self.crit(pred, feed_dict['seg_label'])
                 acc = self.pixel_acc(pred, feed_dict['seg_label'])
                 return loss, acc
             # inference
             else:
-                pred = self.unet(feed_dict['img_data'], return_feature_maps=True)
+                pred = self.unet(feed_dict['img_data'])
                 return pred
 
 
