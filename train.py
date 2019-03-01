@@ -224,13 +224,13 @@ if __name__ == '__main__':
                         help="a name for identifying the model")
     parser.add_argument('--arch_encoder', default='resnet18dilated',
                         help="architecture of net_encoder")
-    parser.add_argument('--arch_decoder', default='ppm_deepsup',
+    parser.add_argument('--arch_decoder', default='C1_deepsup',
                         help="architecture of net_decoder")
     parser.add_argument('--weights_encoder', default='',
                         help="weights to finetune net_encoder")
     parser.add_argument('--weights_decoder', default='',
                         help="weights to finetune net_decoder")
-    parser.add_argument('--fc_dim', default=2048, type=int,
+    parser.add_argument('--fc_dim', default=512, type=int,
                         help='number of features between encoder and decoder')
 
     # Path related arguments
