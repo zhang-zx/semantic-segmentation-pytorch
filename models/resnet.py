@@ -10,9 +10,7 @@ try:
 except ImportError:
     from urllib.request import urlretrieve
 
-
-__all__ = ['ResNet', 'resnet18', 'resnet50', 'resnet101'] # resnet101 is coming soon!
-
+__all__ = ['ResNet', 'resnet18', 'resnet50', 'resnet101']  # resnet101 is coming soon!
 
 model_urls = {
     'resnet18': 'http://sceneparsing.csail.mit.edu/model/pretrained_resnet/resnet18-imagenet.pth',
@@ -163,6 +161,7 @@ class ResNet(nn.Module):
 
         return x
 
+
 def resnet18(pretrained=False, **kwargs):
     """Constructs a ResNet-18 model.
 
@@ -173,6 +172,7 @@ def resnet18(pretrained=False, **kwargs):
     if pretrained:
         model.load_state_dict(load_url(model_urls['resnet18']))
     return model
+
 
 '''
 def resnet34(pretrained=False, **kwargs):
@@ -186,6 +186,7 @@ def resnet34(pretrained=False, **kwargs):
         model.load_state_dict(load_url(model_urls['resnet34']))
     return model
 '''
+
 
 def resnet50(pretrained=False, **kwargs):
     """Constructs a ResNet-50 model.
@@ -209,6 +210,7 @@ def resnet101(pretrained=False, **kwargs):
     if pretrained:
         model.load_state_dict(load_url(model_urls['resnet101']), strict=False)
     return model
+
 
 # def resnet152(pretrained=False, **kwargs):
 #     """Constructs a ResNet-152 model.

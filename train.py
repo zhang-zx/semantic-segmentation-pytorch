@@ -17,7 +17,7 @@ import lib.utils.data as torchdata
 
 import data.joint_transforms as joint_transforms
 import data.transforms as extended_transforms
-import torchvision.transform as standard_transforms
+import torchvision.transforms as standard_transforms
 
 
 # train one epoch
@@ -167,7 +167,7 @@ def main(args):
             net_encoder, net_decoder, crit)
 
     train_joint_transform = joint_transforms.Compose([
-        joint_transforms.RandomCrop(args['input_size']),
+        joint_transforms.RandomCrop(args.input_size),
         joint_transforms.RandomHorizontallyFlip()
     ])
 
@@ -274,6 +274,9 @@ if __name__ == '__main__':
     parser.add_argument('--imgSize', default=[300, 375, 450, 525, 600],
                         nargs='+', type=int,
                         help='input image size of short edge (int or list)')
+    parser.add_argument('--input_size', default=(256, 512),
+                        nargs='+', type=int,
+                        help='crop size')
     parser.add_argument('--imgMaxSize', default=1000, type=int,
                         help='maximum input image size of long edge')
     parser.add_argument('--padding_constant', default=8, type=int,
