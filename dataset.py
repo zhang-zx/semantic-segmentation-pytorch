@@ -6,6 +6,7 @@ import cv2
 from torchvision import transforms
 from scipy.misc import imread, imresize
 import numpy as np
+from PIL import Image
 
 
 # Round x to the nearest multiple of p and x' >= x
@@ -14,7 +15,10 @@ def round2nearest_multiple(x, p):
 
 
 class TrainDataset(torchdata.Dataset):
-    def __init__(self, odgt, opt, max_sample=-1, batch_per_gpu=1):
+    def __init__(self, odgt, opt, max_sample=-1, batch_per_gpu=1, joint_transform=None, sliding_crop=None):
+        self.joint_transform = joint_transform
+        self.sliding_crop = sliding_crop
+
         self.root_dataset = opt.root_dataset
         self.imgSize = opt.imgSize
         self.imgMaxSize = opt.imgMaxSize
@@ -121,7 +125,7 @@ class TrainDataset(torchdata.Dataset):
             assert (img.shape[0] == segm.shape[0])
             assert (img.shape[1] == segm.shape[1])
 
-            if self.random_flip == True:
+            if self.random_flip:
                 random_flip = np.random.choice([0, 1])
                 if random_flip == 1:
                     img = cv2.flip(img, 1)
@@ -143,6 +147,12 @@ class TrainDataset(torchdata.Dataset):
             # image to float
             img = img.astype(np.float32)[:, :, ::-1]  # RGB to BGR!!!
             img = img.transpose((2, 0, 1))
+            if self.joint_transform is not None:
+                img, segm = self.joint_transform(Image.fromarray(img.copy()), Image.fromarray(segm.copy().astype(np.uint8)))
+            if self.sliding_crop is not None:
+                img_slices, segm_slices, slices_info = self.sliding_crop(img, segm)
+                img, mask = torch.stack(img_slices, 0), torch.stack(segm_slices, 0)
+
             img = self.img_transform(torch.from_numpy(img.copy()))
 
             batch_images[i][:, :img.shape[1], :img.shape[2]] = img

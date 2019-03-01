@@ -15,6 +15,10 @@ from utils import AverageMeter, parse_devices
 from lib.nn import UserScatteredDataParallel, user_scattered_collate, patch_replication_callback
 import lib.utils.data as torchdata
 
+import data.joint_transforms as joint_transforms
+import data.transforms as extended_transforms
+import torchvision.transform as standard_transforms
+
 
 # train one epoch
 def train(segmentation_module, iterator, optimizers, history, epoch, args):
@@ -162,9 +166,14 @@ def main(args):
         segmentation_module = SegmentationModule(
             net_encoder, net_decoder, crit)
 
+    train_joint_transform = joint_transforms.Compose([
+        joint_transforms.RandomCrop(args['input_size']),
+        joint_transforms.RandomHorizontallyFlip()
+    ])
+
     # Dataset and Loader
     dataset_train = TrainDataset(
-        args.list_train, args, batch_per_gpu=args.batch_size_per_gpu)
+        args.list_train, args, batch_per_gpu=args.batch_size_per_gpu, joint_transform=train_joint_transform)
 
     loader_train = torchdata.DataLoader(
         dataset_train,
