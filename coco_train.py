@@ -236,7 +236,7 @@ def main(args):
             with_label=False,
             test_mode=True,
             resize_keep_ratio=False))
-    train_dataset = get_dataset(data[train])
+    train_dataset = get_dataset(data.train)
     pdb.set_trace()
     data_loaders = [
         build_dataloader(
