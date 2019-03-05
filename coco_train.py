@@ -24,12 +24,9 @@ import torchvision.transforms as standard_transforms
 import argparse
 from mmcv import Config
 
-# from mmdet import __version__
+from mmdet import __version__
 from mmdet.datasets import get_dataset
 from mmdet.datasets import build_dataloader
-from mmdet.apis import (train_detector, init_dist, get_root_logger,
-                        set_random_seed)
-from mmdet.models import build_detector
 import torch
 import pdb
 
