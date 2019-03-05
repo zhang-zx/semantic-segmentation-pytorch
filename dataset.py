@@ -29,8 +29,6 @@ class TrainDataset(torchdata.Dataset):
         # down sampling rate of segm labe
         self.segm_downsampling_rate = opt.segm_downsampling_rate
         self.batch_per_gpu = batch_per_gpu
-        # self.joint_transform = joint_transform
-
         # classify images into two classes: 1. h > w and 2. h <= w
         self.batch_record_list = [[], []]
 
