@@ -45,6 +45,7 @@ def train(segmentation_module, iterator, optimizers, history, epoch, args):
     tic = time.time()
     for i in range(args.epoch_iters):
         batch_data = next(iterator)
+        pdb.set_trace()
         data_time.update(time.time() - tic)
 
         segmentation_module.zero_grad()
@@ -238,7 +239,6 @@ def main(args):
             test_mode=True,
             resize_keep_ratio=False))
     train_dataset = get_dataset(data["train"])
-    pdb.set_trace()
     # data_loaders = [
     #     build_dataloader(
     #         train_dataset,
