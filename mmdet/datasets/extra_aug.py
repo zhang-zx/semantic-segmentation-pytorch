@@ -2,7 +2,7 @@ import mmcv
 import numpy as np
 from numpy import random
 
-# from mmdet.core.evaluation.bbox_overlaps import bbox_overlaps
+from mmdet.core.evaluation.bbox_overlaps import bbox_overlaps
 
 
 class PhotoMetricDistortion(object):
