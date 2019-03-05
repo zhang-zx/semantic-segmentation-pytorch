@@ -12,6 +12,7 @@ import torch
 import torch.nn as nn
 # Our libs
 from dataset import TrainDataset
+from torch.utils.data import DataLoader
 from models import ModelBuilder, SegmentationModule
 from utils import AverageMeter, parse_devices
 from lib.nn import UserScatteredDataParallel, user_scattered_collate, patch_replication_callback
@@ -236,16 +237,25 @@ def main(args):
             with_label=False,
             test_mode=True,
             resize_keep_ratio=False))
-    train_dataset = get_dataset(data.train)
+    train_dataset = get_dataset(data["train"])
     pdb.set_trace()
-    data_loaders = [
-        build_dataloader(
-            train_dataset,
-            data.train.imgs_per_gpu,
-            data.workers_per_gpu,
-            args.gpus,
-            dist=False)
-    ]
+    # data_loaders = [
+    #     build_dataloader(
+    #         train_dataset,
+    #         int(data["imgs_per_gpu"]),
+    #         int(data["workers_per_gpu"]),
+    #         args.gpus,
+    #         dist=False)
+    # ]
+    loader_train = DataLoader(
+        train_dataset,
+        batch_size=len(args.gpus),
+        num_workers=int(args.workers),
+        collate_fn=user_scattered_collate,
+        pin_memory=True,
+        shuffle=False,
+        drop_last=True
+    )
     # dataset_train = TrainDataset(
     #     args.list_train, args, batch_per_gpu=args.batch_size_per_gpu)
     #
@@ -258,34 +268,34 @@ def main(args):
     #     drop_last=True,
     #     pin_memory=True)
     #
-    # print('1 Epoch = {} iters'.format(args.epoch_iters))
-    #
-    # # create loader iterator
-    # iterator_train = iter(loader_train)
-    #
-    # # load nets into gpu
-    # if len(args.gpus) > 1:
-    #     segmentation_module = UserScatteredDataParallel(
-    #         segmentation_module,
-    #         device_ids=args.gpus)
-    #     # For sync bn
-    #     patch_replication_callback(segmentation_module)
-    # segmentation_module.cuda()
-    #
-    # # Set up optimizers
-    # nets = (net_encoder, net_decoder, crit)
-    # optimizers = create_optimizers(nets, args)
-    #
-    # # Main loop
-    # history = {'train': {'epoch': [], 'loss': [], 'acc': []}}
-    #
-    # for epoch in range(args.start_epoch, args.num_epoch + 1):
-    #     train(segmentation_module, iterator_train, optimizers, history, epoch, args)
-    #
-    #     # checkpointing
-    #     checkpoint(nets, history, args, epoch)
-    #
-    # print('Training Done!')
+    print('1 Epoch = {} iters'.format(args.epoch_iters))
+
+    # create loader iterator
+    iterator_train = iter(loader_train)
+
+    # load nets into gpu
+    if len(args.gpus) > 1:
+        segmentation_module = UserScatteredDataParallel(
+            segmentation_module,
+            device_ids=args.gpus)
+        # For sync bn
+        patch_replication_callback(segmentation_module)
+    segmentation_module.cuda()
+
+    # Set up optimizers
+    nets = (net_encoder, net_decoder, crit)
+    optimizers = create_optimizers(nets, args)
+
+    # Main loop
+    history = {'train': {'epoch': [], 'loss': [], 'acc': []}}
+
+    for epoch in range(args.start_epoch, args.num_epoch + 1):
+        train(segmentation_module, iterator_train, optimizers, history, epoch, args)
+
+        # checkpointing
+        checkpoint(nets, history, args, epoch)
+
+    print('Training Done!')
 
 
 if __name__ == '__main__':
