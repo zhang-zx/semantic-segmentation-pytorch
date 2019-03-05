@@ -15,7 +15,7 @@ def round2nearest_multiple(x, p):
 
 
 class TrainDataset(torchdata.Dataset):
-    def __init__(self, odgt, opt, max_sample=-1, batch_per_gpu=1, joint_transform=None):
+    def __init__(self, odgt, opt, max_sample=-1, batch_per_gpu=1):
         self.random_gaussian_blur = opt.random_gaussian_blur
         self.random_flip = opt.random_flip
         self.random_rotate = opt.random_rotate
@@ -29,7 +29,7 @@ class TrainDataset(torchdata.Dataset):
         # down sampling rate of segm labe
         self.segm_downsampling_rate = opt.segm_downsampling_rate
         self.batch_per_gpu = batch_per_gpu
-        self.joint_transform = joint_transform
+        # self.joint_transform = joint_transform
 
         # classify images into two classes: 1. h > w and 2. h <= w
         self.batch_record_list = [[], []]
@@ -142,11 +142,6 @@ class TrainDataset(torchdata.Dataset):
                 import data.transforms
                 random_gaussian_blur = data.transforms.RandomGaussianBlur()
                 img = random_gaussian_blur(Image.fromarray(img.copy()))
-
-
-
-
-
 
             # note that each sample within a mini batch has different scale param
             img = imresize(img, (batch_resized_size[i, 0], batch_resized_size[i, 1]), interp='bilinear')

@@ -166,14 +166,14 @@ def main(args):
         segmentation_module = SegmentationModule(
             net_encoder, net_decoder, crit)
 
-    train_joint_transform = joint_transforms.Compose([
-        joint_transforms.RandomCrop(args.input_size),
-        joint_transforms.RandomHorizontallyFlip()
-    ])
+    # train_joint_transform = joint_transforms.Compose([
+    #     joint_transforms.RandomCrop(args.input_size),
+    #     joint_transforms.RandomHorizontallyFlip()
+    # ])
 
     # Dataset and Loader
     dataset_train = TrainDataset(
-        args.list_train, args, batch_per_gpu=args.batch_size_per_gpu, joint_transform=train_joint_transform)
+        args.list_train, args, batch_per_gpu=args.batch_size_per_gpu)
 
     loader_train = torchdata.DataLoader(
         dataset_train,
@@ -283,10 +283,12 @@ if __name__ == '__main__':
                         help='maxmimum downsampling rate of the network')
     parser.add_argument('--segm_downsampling_rate', default=8, type=int,
                         help='downsampling rate of the segmentation label')
-    parser.add_argument('--random_flip', default=True, type=bool,
+    parser.add_argument('--random_flip', default=False, type=bool,
                         help='if horizontally flip images when training')
-    parser.add_argument('--random_rotate', default=True, type=bool,
+    parser.add_argument('--random_rotate', default=False, type=bool,
                         help='if rotate images when training')
+    parser.add_argument('--random_gaussian_blur', default=False, type=bool,
+                        help='if random_gaussian_blur images when training')
 
     # Misc arguments
     parser.add_argument('--seed', default=304, type=int, help='manual seed')
