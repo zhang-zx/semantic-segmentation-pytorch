@@ -6,6 +6,7 @@ import cv2
 from torchvision import transforms
 from scipy.misc import imread, imresize
 import numpy as np
+from PIL import Image
 
 
 # Round x to the nearest multiple of p and x' >= x
@@ -15,10 +16,14 @@ def round2nearest_multiple(x, p):
 
 class TrainDataset(torchdata.Dataset):
     def __init__(self, odgt, opt, max_sample=-1, batch_per_gpu=1, joint_transform=None):
+        self.random_gaussian_blur = opt.random_gaussian_blur
+        self.random_flip = opt.random_flip
+        self.random_rotate = opt.random_rotate
+
         self.root_dataset = opt.root_dataset
         self.imgSize = opt.imgSize
         self.imgMaxSize = opt.imgMaxSize
-        self.random_flip = opt.random_flip
+
         # max down sampling rate of network to avoid rounding during conv or pooling
         self.padding_constant = opt.padding_constant
         # down sampling rate of segm labe
@@ -91,7 +96,7 @@ class TrainDataset(torchdata.Dataset):
         batch_resized_size = np.zeros((self.batch_per_gpu, 2), np.int32)
         for i in range(self.batch_per_gpu):
             img_height, img_width = batch_records[i]['height'], batch_records[i]['width']
-            this_scale = min(this_short_size / min(img_height, img_width), \
+            this_scale = min(this_short_size / min(img_height, img_width),
                              self.imgMaxSize / max(img_height, img_width))
             img_resized_height, img_resized_width = img_height * this_scale, img_width * this_scale
             batch_resized_size[i, :] = img_resized_height, img_resized_width
@@ -105,7 +110,7 @@ class TrainDataset(torchdata.Dataset):
         assert self.padding_constant >= self.segm_downsampling_rate, \
             'padding constant must be equal or large than segm downsamping rate'
         batch_images = torch.zeros(self.batch_per_gpu, 3, batch_resized_height, batch_resized_width)
-        batch_segms = torch.zeros(self.batch_per_gpu, batch_resized_height // self.segm_downsampling_rate, \
+        batch_segms = torch.zeros(self.batch_per_gpu, batch_resized_height // self.segm_downsampling_rate,
                                   batch_resized_width // self.segm_downsampling_rate).long()
 
         for i in range(self.batch_per_gpu):
@@ -127,6 +132,21 @@ class TrainDataset(torchdata.Dataset):
                 if random_flip == 1:
                     img = cv2.flip(img, 1)
                     segm = cv2.flip(segm, 1)
+            if self.random_rotate:
+                import data.joint_transforms
+                random_rotate = data.joint_transforms.RandomRotate(np.random.rand())
+                img, segm = random_rotate(Image.fromarray(img.copy()), Image.fromarray(segm.copy()))
+                img = np.asarray(img)
+                segm = np.asarray(segm)
+            if self.random_gaussian_blur:
+                import data.transforms
+                random_gaussian_blur = data.transforms.RandomGaussianBlur()
+                img = random_gaussian_blur(Image.fromarray(img.copy()))
+
+
+
+
+
 
             # note that each sample within a mini batch has different scale param
             img = imresize(img, (batch_resized_size[i, 0], batch_resized_size[i, 1]), interp='bilinear')

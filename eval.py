@@ -150,7 +150,7 @@ if __name__ == '__main__':
     # Model related arguments
     parser.add_argument('--id', required=True,
                         help="a name for identifying the model to load")
-    parser.add_argument('--suffix', default='_epoch_20.pth',
+    parser.add_argument('--suffix', default='_epoch_20.pth', type=str,
                         help="which snapshot to load")
     parser.add_argument('--arch_encoder', default='resnet50dilated',
                         help="architecture of net_encoder")

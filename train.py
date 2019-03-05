@@ -285,6 +285,8 @@ if __name__ == '__main__':
                         help='downsampling rate of the segmentation label')
     parser.add_argument('--random_flip', default=True, type=bool,
                         help='if horizontally flip images when training')
+    parser.add_argument('--random_rotate', default=True, type=bool,
+                        help='if rotate images when training')
 
     # Misc arguments
     parser.add_argument('--seed', default=304, type=int, help='manual seed')
