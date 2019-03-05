@@ -18,6 +18,8 @@ run/
 Img/
 output/
 data/ADEChallengeData2016
+data/coco
+result/
 build/
 develop-eggs/
 .idea/
