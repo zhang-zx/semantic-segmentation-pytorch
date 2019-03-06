@@ -353,11 +353,12 @@ class TrainDataset(torchdata.Dataset):
                 import data.transforms
                 random_gaussian_blur = data.transforms.RandomGaussianBlur()
                 img = random_gaussian_blur(Image.fromarray(img.copy()))
-
+                img = np.asarray(img)
             if self.FlipChannels:
                 import data.transforms
                 flip_channels = data.transforms.FlipChannels()
                 img = flip_channels(Image.fromarray(img.copy()))
+                img = np.asarray(img)
 
             # note that each sample within a mini batch has different scale param
             img = imresize(img, (batch_resized_size[i, 0], batch_resized_size[i, 1]), interp='bilinear')
