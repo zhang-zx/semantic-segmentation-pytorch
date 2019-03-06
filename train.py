@@ -289,7 +289,7 @@ if __name__ == '__main__':
                         help='if rotate images when training')
     parser.add_argument('--random_gaussian_blur', default=True, type=bool,
                         help='if random_gaussian_blur images when training')
-    parser.add_argument('--flip_channels', default=True, type=bool,
+    parser.add_argument('--FlipChannels', default=True, type=bool,
                         help='if random_gaussian_blur images when training')
 
     # Misc arguments
