@@ -422,7 +422,7 @@ import pdb
 
 
 # train one epoch
-def train(segmentation_module, iterator, optimizers, history, epoch, args):
+def train(segmentation_module, dataloader, optimizers, history, epoch, args):
     batch_time = AverageMeter()
     data_time = AverageMeter()
     ave_total_loss = AverageMeter()
@@ -433,7 +433,13 @@ def train(segmentation_module, iterator, optimizers, history, epoch, args):
     # main loop
     tic = time.time()
     for i in range(args.epoch_iters):
-        batch_data = next(iterator)
+        batch_data = next(dataloader)
+        images = batch_data[0].copy()
+        gt_masks = batch_data[6].copy()
+        batch_data = dict()
+        batch_data['img_data'] = images
+        batch_data['seg_label'] = gt_masks
+
         pdb.set_trace()
         data_time.update(time.time() - tic)
 
@@ -575,55 +581,14 @@ def main(args):
     dataset_train.prepare()
     from dataset import Dataset
     train_set = Dataset(dataset_train, CocoConfig(), augment=True)
-    pdb.set_trace()
+    # pdb.set_trace()
     loader_train = DataLoader(train_set, batch_size=len(args.gpus), shuffle=True, num_workers=int(args.workers))
-    for b in loader_train:
-        print(b)
-        break
 
-
-
-    # Validation dataset
-    # dataset_val = CocoDataset()
-    # dataset_val.load_coco('data/coco', "minival", year=args.year, auto_download=args.download)
-    # dataset_val.prepare()
-    # train_dataset = get_dataset(cfg.data.train)
-    # data_loaders = [
-    #     build_dataloader(
-    #         train_dataset,
-    #         int(data["imgs_per_gpu"]),
-    #         int(data["workers_per_gpu"]),
-    #         args.gpus,
-    #         dist=False)
-    # ]
-
-    # loader_train = DataLoader(
-    #     train_dataset,
-    #     batch_size=len(args.gpus),
-    #     num_workers=int(args.workers),
-    #     collate_fn=user_scattered_collate,
-    #     pin_memory=True,
-    #     shuffle=False,
-    #     drop_last=True
-    # )
-
-    # dataset_train = TrainDataset(
-    #     args.list_train, args, batch_per_gpu=args.batch_size_per_gpu)
-    #
-    # loader_train = torchdata.DataLoader(
-    #     dataset_train,
-    #     batch_size=len(args.gpus),  # we have modified data_parallel
-    #     shuffle=False,  # we do not use this param
-    #     collate_fn=user_scattered_collate,
-    #     num_workers=int(args.workers),
-    #     drop_last=True,
-    #     pin_memory=True)
-    #
     print('1 Epoch = {} iters'.format(args.epoch_iters))
 
     # create loader iterator
     iterator_train = iter(loader_train)
-    pdb.set_trace()
+    # pdb.set_trace()
     # load nets into gpu
     if len(args.gpus) > 1:
         segmentation_module = UserScatteredDataParallel(
@@ -685,11 +650,11 @@ if __name__ == '__main__':
                         default='./data/')
 
     # optimization related arguments
-    parser.add_argument('--gpus', default='0-3',
+    parser.add_argument('--gpus', default='0',
                         help='gpus to use, e.g. 0-3 or 0,1,2,3')
-    parser.add_argument('--batch_size_per_gpu', default=2, type=int,
+    parser.add_argument('--batch_size_per_gpu', default=1, type=int,
                         help='input batch size')
-    parser.add_argument('--num_epoch', default=20, type=int,
+    parser.add_argument('--num_epoch', default=30, type=int,
                         help='epochs to train for')
     parser.add_argument('--start_epoch', default=1, type=int,
                         help='epoch to start training. useful if continue from a checkpoint')
