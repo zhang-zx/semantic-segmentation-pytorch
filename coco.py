@@ -576,6 +576,11 @@ def main(args):
     from dataset import Dataset
     train_set = Dataset(dataset_train, CocoConfig(), augment=True)
     loader_train = DataLoader(train_set, batch_size=len(args.gpus), shuffle=True, num_workers=int(args.workers))
+    for b in loader_train:
+        print(b)
+        break
+
+
 
     # Validation dataset
     # dataset_val = CocoDataset()
