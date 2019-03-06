@@ -15,6 +15,7 @@ import random
 def round2nearest_multiple(x, p):
     return ((x - 1) // p + 1) * p
 
+
 def load_image_gt(dataset, config, image_id, augment=False,
                   use_mini_mask=False):
     """Load and return ground truth data for an image (image, mask, bounding boxes).
@@ -116,10 +117,10 @@ class Dataset(torch.utils.data.Dataset):
         # Anchors
         # [anchor_count, (y1, x1, y2, x2)]
         self.anchors = utils.generate_pyramid_anchors(config.RPN_ANCHOR_SCALES,
-                                                 config.RPN_ANCHOR_RATIOS,
-                                                 config.BACKBONE_SHAPES,
-                                                 config.BACKBONE_STRIDES,
-                                                 config.RPN_ANCHOR_STRIDE)
+                                                      config.RPN_ANCHOR_RATIOS,
+                                                      config.BACKBONE_SHAPES,
+                                                      config.BACKBONE_STRIDES,
+                                                      config.RPN_ANCHOR_STRIDE)
 
     def __getitem__(self, image_index):
         # Get GT bounding boxes and masks for image.
@@ -249,7 +250,6 @@ def build_rpn_targets(image_shape, anchors, gt_class_ids, gt_boxes, config):
         ix += 1
 
     return rpn_match, rpn_bbox
-
 
 
 class TrainDataset(torchdata.Dataset):

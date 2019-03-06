@@ -575,6 +575,7 @@ def main(args):
     dataset_train.prepare()
     from dataset import Dataset
     train_set = Dataset(dataset_train, CocoConfig(), augment=True)
+    pdb.set_trace()
     loader_train = DataLoader(train_set, batch_size=len(args.gpus), shuffle=True, num_workers=int(args.workers))
     for b in loader_train:
         print(b)
