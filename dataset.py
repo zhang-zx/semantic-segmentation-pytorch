@@ -101,6 +101,8 @@ class Dataset(torch.utils.data.Dataset):
         image, image_metas, gt_class_ids, gt_boxes, gt_masks = \
             load_image_gt(self.dataset, self.config, image_id, augment=self.augment,
                           use_mini_mask=self.config.USE_MINI_MASK)
+        import pdb
+        pdb.set_trace()
 
         # Skip images that have no instances. This can happen in cases
         # where we train on a subset of classes and the image doesn't
