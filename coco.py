@@ -551,14 +551,14 @@ def main(args):
     # cfg = Config.fromfile("config.py")
     dataset_train = CocoDataset()
     dataset_train.load_coco('data/coco', "train", year=args.year, auto_download=args.download)
-    dataset_train.load_coco('data/coco', "valminusminival", year=args.year, auto_download=args.download)
+    dataset_train.load_coco('data/coco', "val", year=args.year, auto_download=args.download)
     dataset_train.prepare()
     loader_train = DataLoader(dataset_train, batch_size=len(args.gpus), shuffle=True, num_workers=int(args.workers))
 
     # Validation dataset
-    dataset_val = CocoDataset()
-    dataset_val.load_coco('data/coco', "minival", year=args.year, auto_download=args.download)
-    dataset_val.prepare()
+    # dataset_val = CocoDataset()
+    # dataset_val.load_coco('data/coco', "minival", year=args.year, auto_download=args.download)
+    # dataset_val.prepare()
     # train_dataset = get_dataset(cfg.data.train)
     # data_loaders = [
     #     build_dataloader(
