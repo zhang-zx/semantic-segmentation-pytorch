@@ -434,11 +434,6 @@ def train(segmentation_module, dataloader, optimizers, history, epoch, args):
     tic = time.time()
     for i in range(args.epoch_iters):
         batch_data = next(dataloader)
-        images = batch_data[0].copy()
-        gt_masks = batch_data[6].copy()
-        batch_data = dict()
-        batch_data['img_data'] = images
-        batch_data['seg_label'] = gt_masks
 
         pdb.set_trace()
         data_time.update(time.time() - tic)
