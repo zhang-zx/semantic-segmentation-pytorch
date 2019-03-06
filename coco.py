@@ -248,7 +248,7 @@ class CocoDataset(utils.Dataset):
                 # Is it a crowd? If so, use a negative class ID.
                 if annotation['iscrowd']:
                     # Use negative class ID for crowds
-                    class_id *= -1
+                    # class_id *= -1
                     # For crowd masks, annToMask() sometimes returns a mask
                     # smaller than the given dimensions. If so, resize it.
                     if m.shape[0] != image_info["height"] or m.shape[1] != image_info["width"]:
@@ -258,6 +258,12 @@ class CocoDataset(utils.Dataset):
 
         # Pack instance masks into an array
         if class_ids:
+            mask = np.zeros([image_info["height"], image_info["width"]], dtype=np.float32)
+            i = 0
+            for id in class_ids:
+                mask += id * instance_masks[i]
+                i += 1
+            return mask, np.array(class_ids, dtype=np.int32)
             mask = np.stack(instance_masks, axis=2)
             class_ids = np.array(class_ids, dtype=np.int32)
             return mask, class_ids

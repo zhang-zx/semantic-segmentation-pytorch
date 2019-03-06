@@ -78,33 +78,6 @@ def load_image_gt(dataset, config, image_id, augment=False,
 
 class Dataset(torch.utils.data.Dataset):
     def __init__(self, dataset, config, augment=True):
-        """A generator that returns images and corresponding target class ids,
-            bounding box deltas, and masks.
-
-            dataset: The Dataset object to pick data from
-            config: The model config object
-            shuffle: If True, shuffles the samples before every epoch
-            augment: If True, applies image augmentation to images (currently only
-                     horizontal flips are supported)
-
-            Returns a Python generator. Upon calling next() on it, the
-            generator returns two lists, inputs and outputs. The containtes
-            of the lists differs depending on the received arguments:
-            inputs list:
-            - images: [batch, H, W, C]
-            - image_metas: [batch, size of image meta]
-            - rpn_match: [batch, N] Integer (1=positive anchor, -1=negative, 0=neutral)
-            - rpn_bbox: [batch, N, (dy, dx, log(dh), log(dw))] Anchor bbox deltas.
-            - gt_class_ids: [batch, MAX_GT_INSTANCES] Integer class IDs
-            - gt_boxes: [batch, MAX_GT_INSTANCES, (y1, x1, y2, x2)]
-            - gt_masks: [batch, height, width, MAX_GT_INSTANCES]. The height and width
-                        are those of the image unless use_mini_mask is True, in which
-                        case they are defined in MINI_MASK_SHAPE.
-
-            outputs list: Usually empty in regular training. But if detection_targets
-                is True then the outputs list contains target class_ids, bbox deltas,
-                and masks.
-            """
         self.b = 0  # batch item index
         self.image_index = -1
         self.image_ids = np.copy(dataset.image_ids)
@@ -153,11 +126,6 @@ class Dataset(torch.utils.data.Dataset):
 
         # Convert
         images = torch.from_numpy(images.transpose(2, 0, 1)).float()
-        image_metas = torch.from_numpy(image_metas)
-        rpn_match = torch.from_numpy(rpn_match)
-        rpn_bbox = torch.from_numpy(rpn_bbox).float()
-        gt_class_ids = torch.from_numpy(gt_class_ids)
-        gt_boxes = torch.from_numpy(gt_boxes).float()
         gt_masks = torch.from_numpy(gt_masks.astype(int).transpose(2, 0, 1)).float()
 
         output = dict()
@@ -261,6 +229,7 @@ class TrainDataset(torchdata.Dataset):
         self.random_gaussian_blur = opt.random_gaussian_blur
         self.random_flip = opt.random_flip
         self.random_rotate = opt.random_rotate
+        self.FlipChannels = opt.FlipChannels
 
         self.root_dataset = opt.root_dataset
         self.imgSize = opt.imgSize
@@ -382,6 +351,11 @@ class TrainDataset(torchdata.Dataset):
                 import data.transforms
                 random_gaussian_blur = data.transforms.RandomGaussianBlur()
                 img = random_gaussian_blur(Image.fromarray(img.copy()))
+
+            if self.FlipChannels:
+                import data.transforms
+                flip_channels = data.transforms.FlipChannels()
+                img = flip_channels(Image.fromarray(img.copy()))
 
             # note that each sample within a mini batch has different scale param
             img = imresize(img, (batch_resized_size[i, 0], batch_resized_size[i, 1]), interp='bilinear')

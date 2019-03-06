@@ -38,10 +38,10 @@ class FreeScale(object):
         return img.resize(self.size, self.interpolation)
 
 
-# class FlipChannels(object):
-#     def __call__(self, img):
-#         img = np.array(img)[:, :, ::-1]
-#         return Image.fromarray(img.astype(np.uint8))
+class FlipChannels(object):
+    def __call__(self, img):
+        img = np.array(img)[:, :, ::-1]
+        return Image.fromarray(img.astype(np.uint8))
 
 
 class RandomGaussianBlur(object):
