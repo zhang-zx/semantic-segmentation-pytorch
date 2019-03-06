@@ -48,6 +48,7 @@ import urllib.request
 import shutil
 
 import utils
+from coco_config import Config
 
 import torch
 
@@ -61,6 +62,25 @@ COCO_MODEL_PATH = os.path.join(ROOT_DIR, "mask_rcnn_coco.pth")
 # through the command line argument --logs
 DEFAULT_LOGS_DIR = os.path.join(ROOT_DIR, "logs")
 DEFAULT_DATASET_YEAR = "2017"
+
+
+class CocoConfig(Config):
+    """Configuration for training on MS COCO.
+    Derives from the base Config class and overrides values specific
+    to the COCO dataset.
+    """
+    # Give the configuration a recognizable name
+    NAME = "coco"
+
+    # We use one GPU with 8GB memory, which can fit one image.
+    # Adjust down if you use a smaller GPU.
+    IMAGES_PER_GPU = 16
+
+    # Uncomment to train on 8 GPUs (default is 1)
+    # GPU_COUNT = 8
+
+    # Number of classes (including background)
+    NUM_CLASSES = 1 + 80
 
 
 ############################################################
@@ -553,7 +573,9 @@ def main(args):
     dataset_train.load_coco('data/coco', "train", year=args.year, auto_download=args.download)
     dataset_train.load_coco('data/coco', "val", year=args.year, auto_download=args.download)
     dataset_train.prepare()
-    loader_train = DataLoader(dataset_train, batch_size=len(args.gpus), shuffle=True, num_workers=int(args.workers))
+    from dataset import Dataset
+    train_set = Dataset(dataset_train, CocoConfig(), augment=True)
+    loader_train = DataLoader(train_set, batch_size=len(args.gpus), shuffle=True, num_workers=int(args.workers))
 
     # Validation dataset
     # dataset_val = CocoDataset()
