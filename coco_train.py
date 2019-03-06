@@ -189,6 +189,7 @@ def main(args):
     #         args.gpus,
     #         dist=False)
     # ]
+    pdb.set_trace()
     loader_train = DataLoader(
         train_dataset,
         batch_size=len(args.gpus),
