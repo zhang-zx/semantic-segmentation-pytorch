@@ -189,7 +189,7 @@ def main(args):
     #         args.gpus,
     #         dist=False)
     # ]
-    pdb.set_trace()
+
     loader_train = DataLoader(
         train_dataset,
         batch_size=len(args.gpus),
@@ -215,7 +215,7 @@ def main(args):
 
     # create loader iterator
     iterator_train = iter(loader_train)
-
+    pdb.set_trace()
     # load nets into gpu
     if len(args.gpus) > 1:
         segmentation_module = UserScatteredDataParallel(

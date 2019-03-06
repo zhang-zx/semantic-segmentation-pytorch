@@ -96,8 +96,11 @@ class MaskTransform(object):
     """
 
     def __call__(self, masks, pad_shape, scale_factor, flip=False):
+        import pdb
+        pdb.set_trace()
         masks = [
             mmcv.imrescale(mask, scale_factor, interpolation='nearest')
+
             for mask in masks
         ]
         if flip:
